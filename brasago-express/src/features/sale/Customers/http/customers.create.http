@@ -1,0 +1,61 @@
+### Feature Customer — CREATE
+### Modalidad JWT + RBAC. Recurso `POST /api/customers`: solo lo concede ADMIN (SELLER no).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+### Login SELLER
+# @name loginSeller
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "seller",
+  "password": "Seller123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@sellerToken = {{loginSeller.response.body.$.access_token}}
+
+### CREATE — admin -> 201
+# @name createCustomer
+POST {{baseUrl}}/api/customers
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "documentType": "CC",
+  "documentNumber": "1234567890",
+  "name": "Ana Pérez",
+  "phone": "3001234567",
+  "email": "ana.perez@example.com",
+  "status": "active"
+}
+
+### 403 — el SELLER NO tiene concedido `POST /api/customers` (deny by default)
+POST {{baseUrl}}/api/customers
+Authorization: Bearer {{sellerToken}}
+Content-Type: application/json
+
+{
+  "documentType": "CC",
+  "documentNumber": "1234567891",
+  "name": "Prueba RBAC"
+}
+
+### 401 — sin token
+POST {{baseUrl}}/api/customers
+Content-Type: application/json
+
+{
+  "documentType": "CC",
+  "documentNumber": "1234567892",
+  "name": "Sin token"
+}

@@ -1,0 +1,43 @@
+### Feature Delivery — GET ALL / GET ONE
+### Modalidad JWT + RBAC: `authenticate` (401 sin token) + `authorize` (403 sin concesión).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+### Login SELLER
+# @name loginSeller
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "seller",
+  "password": "Seller123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@sellerToken = {{loginSeller.response.body.$.access_token}}
+@id = 1
+
+### GET ALL — recurso `GET /api/deliveries` (ADMIN y SELLER lo tienen concedido)
+# @name getAllDeliveries
+GET {{baseUrl}}/api/deliveries
+Authorization: Bearer {{token}}
+
+### GET ONE — recurso `GET /api/deliveries/:id`
+# @name getOneDelivery
+GET {{baseUrl}}/api/deliveries/{{id}}
+Authorization: Bearer {{token}}
+
+### 401 — sin token (modalidad JWT no cumplida)
+GET {{baseUrl}}/api/deliveries
+
+### 200 — SELLER sí tiene esta lectura concedida
+GET {{baseUrl}}/api/deliveries
+Authorization: Bearer {{sellerToken}}

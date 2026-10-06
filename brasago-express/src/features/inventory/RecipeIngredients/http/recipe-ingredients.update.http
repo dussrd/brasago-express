@@ -1,0 +1,38 @@
+### Feature RecipeIngredient — UPDATE (PUT) / UPDATE (PATCH)
+### Modalidad JWT + RBAC. `status` no se envía: el estado solo cambia con
+### PATCH {{baseUrl}}/api/recipe-ingredients/{{id}}/deactivate (borrado lógico).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@id = 1
+
+### UPDATE (PUT)
+# @name updateRecipeIngredientPut
+PUT {{baseUrl}}/api/recipe-ingredients/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "ingredientId": 1,
+  "quantity": 0.15
+}
+
+### UPDATE (PATCH)
+# @name updateRecipeIngredientPatch
+PATCH {{baseUrl}}/api/recipe-ingredients/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "quantity": 0.15
+}

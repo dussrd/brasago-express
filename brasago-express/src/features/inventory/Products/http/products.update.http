@@ -1,0 +1,39 @@
+### Feature Product — UPDATE (PUT) / UPDATE (PATCH)
+### Modalidad JWT + RBAC. `status` no se envía: el estado solo cambia con
+### PATCH {{baseUrl}}/api/products/{{id}}/deactivate (borrado lógico).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@id = 1
+
+### UPDATE (PUT)
+# @name updateProductPut
+PUT {{baseUrl}}/api/products/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "sku": "PROD-001",
+  "name": "Hamburguesa clásica Actualizado",
+  "description": "Hamburguesa con tomate",
+  "price": 15000
+}
+
+### UPDATE (PATCH)
+# @name updateProductPatch
+PATCH {{baseUrl}}/api/products/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "price": 15000
+}

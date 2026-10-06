@@ -1,0 +1,65 @@
+### Feature Payment — CREATE
+### Modalidad JWT + RBAC. Recurso `POST /api/payments`: solo lo concede ADMIN (SELLER no).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+### Login SELLER
+# @name loginSeller
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "seller",
+  "password": "Seller123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@sellerToken = {{loginSeller.response.body.$.access_token}}
+
+### CREATE — admin -> 201
+# @name createPayment
+POST {{baseUrl}}/api/payments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "referenceType": "order",
+  "referenceId": 1,
+  "method": "cash",
+  "amount": 25000,
+  "date": "2026-10-05T15:00:00Z",
+  "status": "active"
+}
+
+### 403 — el SELLER NO tiene concedido `POST /api/payments` (deny by default)
+POST {{baseUrl}}/api/payments
+Authorization: Bearer {{sellerToken}}
+Content-Type: application/json
+
+{
+  "referenceType": "order",
+  "referenceId": 1,
+  "method": "cash",
+  "amount": 25000,
+  "date": "2026-10-05T15:00:00Z"
+}
+
+### 401 — sin token
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+
+{
+  "referenceType": "order",
+  "referenceId": 1,
+  "method": "cash",
+  "amount": 25000,
+  "date": "2026-10-05T15:00:00Z"
+}

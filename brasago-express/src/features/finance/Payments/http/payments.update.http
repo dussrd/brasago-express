@@ -1,0 +1,40 @@
+### Feature Payment — UPDATE (PUT) / UPDATE (PATCH)
+### Modalidad JWT + RBAC. `status` no se envía: el estado solo cambia con
+### PATCH {{baseUrl}}/api/payments/{{id}}/deactivate (borrado lógico).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@id = 1
+
+### UPDATE (PUT)
+# @name updatePaymentPut
+PUT {{baseUrl}}/api/payments/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "referenceType": "order",
+  "referenceId": 1,
+  "method": "transfer",
+  "amount": 25000,
+  "date": "2026-10-05T15:00:00Z"
+}
+
+### UPDATE (PATCH)
+# @name updatePaymentPatch
+PATCH {{baseUrl}}/api/payments/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "method": "transfer"
+}

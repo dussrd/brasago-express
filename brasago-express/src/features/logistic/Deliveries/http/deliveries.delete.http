@@ -1,0 +1,27 @@
+### Feature Delivery — DELETE físico / DELETE lógico (status = inactive)
+### Modalidad JWT + RBAC.
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@id = 1
+
+###
+
+# @name deleteDeliveryPhysical
+DELETE {{baseUrl}}/api/deliveries/{{id}}
+Authorization: Bearer {{token}}
+
+###
+
+# @name deleteDeliveryLogical
+PATCH {{baseUrl}}/api/deliveries/{{id}}/deactivate
+Authorization: Bearer {{token}}

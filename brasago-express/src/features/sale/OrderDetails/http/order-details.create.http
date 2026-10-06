@@ -1,0 +1,66 @@
+### Feature OrderDetail — CREATE
+### Modalidad JWT + RBAC. Recurso `POST /api/order-details`: solo lo concede ADMIN (SELLER no).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+### Login SELLER
+# @name loginSeller
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "seller",
+  "password": "Seller123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@sellerToken = {{loginSeller.response.body.$.access_token}}
+
+### CREATE — admin -> 201
+# @name createOrderDetail
+POST {{baseUrl}}/api/order-details
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "orderId": 1,
+  "productId": 1,
+  "quantity": 2,
+  "unitValue": 12500,
+  "total": 25000,
+  "observations": "Sin cebolla",
+  "status": "active"
+}
+
+### 403 — el SELLER NO tiene concedido `POST /api/order-details` (deny by default)
+POST {{baseUrl}}/api/order-details
+Authorization: Bearer {{sellerToken}}
+Content-Type: application/json
+
+{
+  "orderId": 1,
+  "productId": 1,
+  "quantity": 2,
+  "unitValue": 12500,
+  "total": 25000
+}
+
+### 401 — sin token
+POST {{baseUrl}}/api/order-details
+Content-Type: application/json
+
+{
+  "orderId": 1,
+  "productId": 1,
+  "quantity": 2,
+  "unitValue": 12500,
+  "total": 25000
+}

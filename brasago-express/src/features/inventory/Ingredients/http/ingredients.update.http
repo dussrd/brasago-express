@@ -1,0 +1,39 @@
+### Feature Ingredient — UPDATE (PUT) / UPDATE (PATCH)
+### Modalidad JWT + RBAC. `status` no se envía: el estado solo cambia con
+### PATCH {{baseUrl}}/api/ingredients/{{id}}/deactivate (borrado lógico).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@id = 1
+
+### UPDATE (PUT)
+# @name updateIngredientPut
+PUT {{baseUrl}}/api/ingredients/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "ING-001",
+  "name": "Tomate Actualizado",
+  "unitOfMeasure": "kg",
+  "minimumStock": 10
+}
+
+### UPDATE (PATCH)
+# @name updateIngredientPatch
+PATCH {{baseUrl}}/api/ingredients/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "minimumStock": 10
+}

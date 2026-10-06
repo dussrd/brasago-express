@@ -1,0 +1,59 @@
+### Feature RecipeIngredient — CREATE
+### Modalidad JWT + RBAC. Recurso `POST /api/recipe-ingredients`: solo lo concede ADMIN (SELLER no).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+### Login SELLER
+# @name loginSeller
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "seller",
+  "password": "Seller123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@sellerToken = {{loginSeller.response.body.$.access_token}}
+
+### CREATE — admin -> 201
+# @name createRecipeIngredient
+POST {{baseUrl}}/api/recipe-ingredients
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "ingredientId": 1,
+  "quantity": 0.1,
+  "status": "active"
+}
+
+### 403 — el SELLER NO tiene concedido `POST /api/recipe-ingredients` (deny by default)
+POST {{baseUrl}}/api/recipe-ingredients
+Authorization: Bearer {{sellerToken}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "ingredientId": 1,
+  "quantity": 0.1
+}
+
+### 401 — sin token
+POST {{baseUrl}}/api/recipe-ingredients
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "ingredientId": 1,
+  "quantity": 0.1
+}

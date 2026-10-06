@@ -1,0 +1,60 @@
+### Feature Product — CREATE
+### Modalidad JWT + RBAC. Recurso `POST /api/products`: solo lo concede ADMIN (SELLER no).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+### Login SELLER
+# @name loginSeller
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "seller",
+  "password": "Seller123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@sellerToken = {{loginSeller.response.body.$.access_token}}
+
+### CREATE — admin -> 201
+# @name createProduct
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "sku": "PROD-001",
+  "name": "Hamburguesa clásica",
+  "description": "Hamburguesa con tomate",
+  "price": 12500,
+  "status": "active"
+}
+
+### 403 — el SELLER NO tiene concedido `POST /api/products` (deny by default)
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{sellerToken}}
+Content-Type: application/json
+
+{
+  "sku": "PROD-RBAC",
+  "name": "Prueba RBAC",
+  "price": 12500
+}
+
+### 401 — sin token
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+{
+  "sku": "PROD-SIN-TOKEN",
+  "name": "Sin token",
+  "price": 12500
+}

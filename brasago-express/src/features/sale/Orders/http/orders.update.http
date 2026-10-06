@@ -1,0 +1,41 @@
+### Feature Order — UPDATE (PUT) / UPDATE (PATCH)
+### Modalidad JWT + RBAC. `status` no se envía: el estado solo cambia con
+### PATCH {{baseUrl}}/api/orders/{{id}}/deactivate (borrado lógico).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@id = 1
+
+### UPDATE (PUT)
+# @name updateOrderPut
+PUT {{baseUrl}}/api/orders/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "branchId": 1,
+  "channel": "delivery",
+  "date": "2026-10-05T15:00:00Z",
+  "subtotal": 25000,
+  "total": 25000
+}
+
+### UPDATE (PATCH)
+# @name updateOrderPatch
+PATCH {{baseUrl}}/api/orders/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "channel": "delivery"
+}

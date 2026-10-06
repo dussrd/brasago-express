@@ -1,0 +1,41 @@
+### Feature Customer — UPDATE (PUT) / UPDATE (PATCH)
+### Modalidad JWT + RBAC. `status` no se envía: el estado solo cambia con
+### PATCH {{baseUrl}}/api/customers/{{id}}/deactivate (borrado lógico).
+@baseUrl = http://localhost:4000
+
+# @name loginAdmin
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+@token = {{loginAdmin.response.body.$.access_token}}
+@id = 1
+
+### UPDATE (PUT)
+# @name updateCustomerPut
+PUT {{baseUrl}}/api/customers/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "documentType": "CC",
+  "documentNumber": "1234567890",
+  "name": "Ana Pérez Actualizado",
+  "phone": "3011112233",
+  "email": "ana.actualizada@example.com"
+}
+
+### UPDATE (PATCH)
+# @name updateCustomerPatch
+PATCH {{baseUrl}}/api/customers/{{id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phone": "3011112233",
+  "email": "ana.actualizada@example.com"
+}

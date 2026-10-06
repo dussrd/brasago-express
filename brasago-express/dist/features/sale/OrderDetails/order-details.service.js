@@ -1,0 +1,96 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.OrderDetailsService = void 0;
+const dto_1 = require("./dto");
+const order_details_repository_1 = require("./order-details.repository");
+const app_error_1 = require("../../../shared/errors/app-error");
+/**
+ * Capa Service del feature OrderDetails.
+ *
+ * Reglas de negocio: estado por defecto, borrado lógico, borrado físico y respuesta DTO.
+ *
+ * No conoce `req`/`res` ni escribe Sequelize directamente: delega en el
+ * repository y devuelve **DTOs** (carpeta `dto/`), nunca instancias del modelo.
+ */
+class OrderDetailsService {
+    constructor(repository = new order_details_repository_1.OrderDetailsRepository()) {
+        this.repository = repository;
+    }
+    // ================== READ ==================
+    async getAll() {
+        const records = await this.repository.findAllActive();
+        return records.map((record) => (0, dto_1.toOrderDetailResponse)(record));
+    }
+    async getOne(id) {
+        return (0, dto_1.toOrderDetailResponse)(await this.findOrFail(id));
+    }
+    // ================== CREATE ==================
+    async create(body) {
+        // Sólo los campos permitidos llegan al modelo; evita mass assignment.
+        const record = await this.repository.create({
+            orderId: body.orderId,
+            productId: body.productId,
+            quantity: body.quantity,
+            unitValue: body.unitValue,
+            total: body.total,
+            observations: body.observations,
+            status: body.status ?? "active",
+        });
+        return (0, dto_1.toOrderDetailResponse)(record);
+    }
+    // ================== UPDATE ==================
+    async updatePut(id, body) {
+        const record = await this.findOrFail(id);
+        await this.repository.update(record, {
+            orderId: body.orderId,
+            productId: body.productId,
+            quantity: body.quantity,
+            unitValue: body.unitValue,
+            total: body.total,
+            observations: body.observations,
+        });
+        return (0, dto_1.toOrderDetailResponse)(record);
+    }
+    async updatePatch(id, body) {
+        const record = await this.findOrFail(id);
+        // Copia sólo los campos editables enviados; conserva los demás.
+        const data = {};
+        if (body.orderId !== undefined)
+            data.orderId = body.orderId;
+        if (body.productId !== undefined)
+            data.productId = body.productId;
+        if (body.quantity !== undefined)
+            data.quantity = body.quantity;
+        if (body.unitValue !== undefined)
+            data.unitValue = body.unitValue;
+        if (body.total !== undefined)
+            data.total = body.total;
+        if (body.observations !== undefined)
+            data.observations = body.observations;
+        await this.repository.update(record, data);
+        return (0, dto_1.toOrderDetailResponse)(record);
+    }
+    // ================== DELETE ==================
+    /** Eliminación física. */
+    async deletePhysical(id) {
+        const record = await this.findOrFail(id, false);
+        await this.repository.delete(record);
+    }
+    /** Eliminación lógica -> `status = inactive`. */
+    async deleteLogical(id) {
+        const record = await this.findOrFail(id);
+        await this.repository.update(record, { status: "inactive" });
+        return (0, dto_1.toOrderDetailResponse)(record);
+    }
+    // ================== HELPERS ==================
+    /** Busca por PK: los inactivos no son visibles salvo para borrado físico. */
+    async findOrFail(id, onlyActive = true) {
+        const record = await this.repository.findById(id);
+        if (!record || (onlyActive && record.status !== "active")) {
+            throw new app_error_1.AppError(404, "OrderDetail not found");
+        }
+        return record;
+    }
+}
+exports.OrderDetailsService = OrderDetailsService;
+//# sourceMappingURL=order-details.service.js.map
